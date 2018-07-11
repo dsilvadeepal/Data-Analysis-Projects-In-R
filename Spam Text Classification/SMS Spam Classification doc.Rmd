@@ -1,0 +1,118 @@
+---
+title: "SMS Spam Classification"
+author: "Deepal DSilva"
+date: "July 10, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Filtering SMS spam messages using various classification algorithms such as Naive Bayes, SVM, Decision Trees & Random 
+
+```{r}
+setwd("C:/Users/dsilv/Desktop/Learning/Data Science/Data-Analysis-Projects-In-R/Spam Text Classification")
+```
+
+
+Import Libraries 
+```{r}
+library(tm)
+library(SnowballC)
+library(wordcloud)
+library(RColorBrewer) 
+library(randomForest)  #For Random Forests
+library(rpart)         #For Decision Trees
+library(e1071)         #For Naive Bayes & SVM
+library(caret)         #For the confusion matrix
+```
+
+
+Import data
+
+```{r}
+sms_raw <- read.csv("spam.csv")
+```
+
+1. Data Exploration & Visualization
+
+```{r}
+head(sms_raw)
+
+```
+    
+We see that there are only 5 columns: first indicating if it a spam/ham(non-spam) message and the second with the actual message. The last 3 do not have a lot of data.
+ We are going to remove the last 3 columns from the dataset and also rename the column headers.
+
+```{r}
+
+sms_raw <- sms_raw[, 1:2]
+
+colnames(sms_raw) <- c("Tag", "Msg")
+
+str(sms_raw)
+
+table(sms_raw$Tag)
+
+prop.table(table(sms_raw$Tag))
+
+
+```
+
+We see around 87% of the messages are valid and 13% are spam.
+
+Let's visualize the spam and ham sms messages using wordclouds.
+
+```{r}
+spam <- subset(sms_raw, Tag == "spam")
+wordcloud(spam$Msg, max.words = 60, colors = brewer.pal(7, "Paired"), random.order = FALSE)
+
+
+ham <- subset(sms_raw, Tag == "ham")
+wordcloud(ham$Msg, max.words = 60, colors = brewer.pal(7, "Paired"), random.order = FALSE)
+```
+
+
+2. Data Preprocessing
+```{r}
+
+#Data Cleansing
+sms_corpus <- VCorpus(VectorSource(sms_raw$Msg))
+
+sms_dtm <- DocumentTermMatrix(sms_corpus, control = 
+                                 list(tolower = TRUE,
+                                      removeNumbers = TRUE,
+                                      stopwords = TRUE,
+                                      removePunctuation = TRUE,
+                                      stemming = TRUE))
+
+dim(sms_dtm)
+
+#Prepare the training and test dataset 80% and 20%. As the data is already randomly sorted we can split it directly.
+
+#Training set
+sms_dtm_train <- sms_dtm[1:4457, ]
+
+#Test set
+sms_dtm_test <- sms_dtm[4458:5572, ]
+
+#Training Label
+sms_train_labels <- sms_raw[1:4457, ]$Tag
+
+#Test Label
+sms_test_labels <- sms_raw[4458:5572, ]$Tag
+
+#Proportion for train labels
+prop.table(table(sms_train_labels))
+
+#Proportion for test labels
+prop.table(table(sms_test_labels))
+
+```
+
+3. ML Model Fitting
+
+4. Evaluating the model
+
+5. Fine Tuning the model
