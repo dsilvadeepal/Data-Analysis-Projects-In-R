@@ -111,8 +111,70 @@ prop.table(table(sms_test_labels))
 
 ```
 
+#Naive Bayes
+Creating indicator features
+
+We extract the most frequent words in the texts to reduce the number of features in the Naive Bayes algorithm
+
+```{r}
+threshold <- 0.1
+
+min_freq = round(sms_dtm$nrow*(threshold/100),0)
+
+min_freq
+
+# Create vector of most frequent words
+freq_words <- findFreqTerms(x = sms_dtm, lowfreq = min_freq)
+
+str(freq_words)
+```
+
+We now have a vector of 1260 words that are most frequent.
+
+```{r}
+#filter the DTM sparse matrix to only contain words that are most frequent to reduce features in the DTM
+
+sms_dtm_freq_train <- sms_dtm_train[ , freq_words]
+sms_dtm_freq_test <- sms_dtm_test[ , freq_words]
+
+dim(sms_dtm_freq_train)
+
+
+```
+
+#Convert numeric values into categorical values
+
+Since Naive Bayes trains on categorical data, the numerical data must be converted to categorical data. We will convert the numeric features by creating a function that converts any non-zero positive value to "Yes" and all zero values to "No" to indicate whether a specific term is present in the document.
+
+```{r}
+convert_values <- function(x) {
+  x <- ifelse(x > 0, "Yes", "No")
+}
+
+sms_train <- apply(sms_dtm_freq_train, MARGIN = 2,
+                   convert_values)
+sms_test <- apply(sms_dtm_freq_test, MARGIN = 2,
+                  convert_values)
+
+str(sms_train)
+```
+
 3. ML Model Fitting
+
+Naive Bayes
+```{r}
+sms_classifier <- naiveBayes(sms_train, sms_train_labels)
+
+sms_test_pred <- predict(sms_classifier, sms_test)
+
+
+```
+
 
 4. Evaluating the model
 
-5. Fine Tuning the model
+# Create confusion matrix
+```{r}
+confusionMatrix(data = sms_test_pred, reference = sms_test_labels, positive = "spam", dnn = c("Prediction", "Actual"))
+```
+
