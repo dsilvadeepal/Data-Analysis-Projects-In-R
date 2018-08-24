@@ -1,0 +1,87 @@
+---
+title: "Data Scientist Survey"
+author: "Deepal DSilva"
+date: "August 23, 2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+
+## Installing Required Packages
+
+```{r Import PACKAGES, message=FALSE, warning=FALSE}
+setwd("C:/Users/dsilv/Desktop/Learning/Data Science/Data-Analysis-Projects-In-R/Data Scientist Survey")
+
+library(tidyverse)
+library(stringr)
+library(tm)
+library(rlang)
+library(splitstackshape)
+```
+
+## Loading Data
+The data comes in 4 files:
+
+* Multiple choice Data
+* Free form responses
+* Questions asked
+* Currency conversion rates (for the salary)
+
+```{r Data import, message=FALSE, warning=FALSE}
+# Import multiple choice responses
+rawMCdata <- read.csv('multipleChoiceResponses.csv', stringsAsFactors = TRUE, header = TRUE)
+
+# Import freeform responses
+rawFFRdata <- read.csv('freeformResponses.csv', stringsAsFactors = FALSE, header = TRUE)
+
+# Import questions asked
+schema <- read.csv('schema.csv', stringsAsFactors = FALSE, header = TRUE)
+
+# Import currency conversion rates
+conversionRates <- read.csv('conversionRates.csv', header = TRUE)
+
+```
+
+Functions to process Multiple Choice survey response sheet
+
+```{r}
+# A function to analyze responses which are a single choice
+singleChoice = function(question, filteredData = rawMCdata){
+  
+
+  filteredData %>% 
+    # Remove any rows where the respondent didn't answer the question
+    drop_na(question)  %>% 
+    # Group by the responses to the question
+    group_by(!! (sym(question))) %>% 
+    # Count how many respondents selected each option
+    summarise(count = n()) %>% 
+    # Calculate what percent of respondents selected each option
+    mutate(percent = (count / sum(count)) * 100) %>% 
+    # Arrange the counts in descending order
+    arrange(desc(count))
+  
+}
+
+```
+
+```{r}
+singleChoice("MLMethodNextYearSelect")
+```
+
+
+### Data Exploration
+### Demographics - Age, Gender, Location, Age/gender, Location/gender, Education
+
+### Employment - Type of Industry, Size of company, Tools used a work, DS methods at wrk, Maths level reqd at work, remote work, sharing code at work, future learning, recommended language, Annual Salary, Job satisfaction, Promotions/Salary increase
+
+### Career background
+
+### Breaking into DS - Resources, Podcast/Blog etc, Time spent learning DS, Important skills, Online platforms, Time spent per week on studying, Proving/Showcase your knowledge, where to look for job opps, Area & Technique of Competence

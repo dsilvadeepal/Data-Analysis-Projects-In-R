@@ -9,7 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Filtering SMS spam messages using various classification algorithms such as Naive Bayes, SVM, Decision Trees & Random 
 
 ```{r}
 setwd("C:/Users/dsilv/Desktop/Learning/Data Science/Data-Analysis-Projects-In-R/Spam Text Classification")
@@ -22,9 +21,7 @@ library(tm)
 library(SnowballC)
 library(wordcloud)
 library(RColorBrewer) 
-library(randomForest)  #For Random Forests
-library(rpart)         #For Decision Trees
-library(e1071)         #For Naive Bayes & SVM
+library(e1071)         #For Naive Bayes
 library(caret)         #For the confusion matrix
 ```
 
