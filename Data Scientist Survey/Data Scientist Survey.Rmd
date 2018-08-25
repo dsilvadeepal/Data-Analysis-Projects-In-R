@@ -64,7 +64,7 @@ singleChoice = function(question, filteredData = rawMCdata){
     # Count how many respondents selected each option
     summarise(count = n()) %>% 
     # Calculate what percent of respondents selected each option
-    mutate(percent = (count / sum(count)) * 100) %>% 
+    mutate(percent = round((count / sum(count)) * 100, digits=2)) %>% 
     # Arrange the counts in descending order
     arrange(desc(count))
   
@@ -72,11 +72,50 @@ singleChoice = function(question, filteredData = rawMCdata){
 
 ```
 
+
+Gender distribution
 ```{r}
-singleChoice("MLMethodNextYearSelect")
+gender <- singleChoice("GenderSelect") #%>%
+            filter(GenderSelect == "Male" | GenderSelect == "Female" )
+
+
+ggplot(gender,aes(x= reorder(GenderSelect, -percent),
+                  y= percent, fill=GenderSelect)) + geom_bar(stat="identity") +
+labs(x="Gender",y="Percent",title="Distribution of Gender") +  geom_text(aes(label=percent),color="black") + 
+  theme(legend.position="none") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+#____________
+
+#genderlevels <- c("Male","Female","A different identity","Non-binary, genderqueer, or gender non-conforming")
+#gender$GenderSelect = factor(gender$GenderSelect,levels=genderlevels) %>% droplevels() %>% filter(!is.na(GenderSelect))
+
+
+
+
+
 ```
+0.48% identify as "Non-binary, genderqueer, or gender on-conforming", and .98% identify as "A different identity" . :et's remove this from our analysis since this is going to vary greatly across countries in our furher analysis.
+
+Age Distribution
+
+```{r}
+rawMCdata$Age <- as.numeric(as.character(rawMCdata$Age))
+
+agedf <- rawMCdata %>% 
+  filter(!Age == "") %>% 
+  select(Age)
+
+ggplot(agedf, aes(Age), binwidth=2) + 
+  geom_histogram() + 
+  xlab("Age") + 
+  ylab("Number of Respondents")
 
 
+```
+The majority of Kaggle users are young adults (early 20's to 30's). We also see some entries at 0 & 100 years that are likely not accurate. 
+
+Lets compare our age & gender among the top 10 countries
 ### Data Exploration
 ### Demographics - Age, Gender, Location, Age/gender, Location/gender, Education
 
