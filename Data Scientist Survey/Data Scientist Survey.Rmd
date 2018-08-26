@@ -49,7 +49,7 @@ conversionRates <- read.csv('conversionRates.csv', header = TRUE)
 
 ```
 
-Functions to process Multiple Choice survey response sheet
+Function to process Multiple Choice survey response sheet
 
 ```{r}
 # A function to analyze responses which are a single choice
@@ -75,7 +75,7 @@ singleChoice = function(question, filteredData = rawMCdata){
 
 Gender distribution
 ```{r}
-gender <- singleChoice("GenderSelect") #%>%
+gender <- singleChoice("GenderSelect") %>%
             filter(GenderSelect == "Male" | GenderSelect == "Female" )
 
 
@@ -116,6 +116,45 @@ ggplot(agedf, aes(Age), binwidth=2) +
 The majority of Kaggle users are young adults (early 20's to 30's). We also see some entries at 0 & 100 years that are likely not accurate. 
 
 Lets compare our age & gender among the top 10 countries
+
+```{r}
+#Find the top 10 countries with the most Kaggle users
+top10Countries <- singleChoice("Country") %>% 
+  filter(Country != "Other") %>%
+  top_n(10, count) #%>%
+  mutate(Country = as.character(Country)) 
+
+  #top10Countries$Country[top10Countries$Country == "People's Republic of China"] <- "China"
+
+#Prepare a table with gender & top 10 countries
+gendervscountry <- rawMCdata %>%
+  filter(Country %in% top10Countries$Country) %>% 
+  filter(GenderSelect == "Male" | GenderSelect == "Female" ) %>%
+  select(Country, GenderSelect) %>%
+  mutate(totalCount = n()) %>%
+  group_by(Country, GenderSelect) %>%
+  summarise(count = n()) %>%
+  mutate(percent = round(count/sum(count) * 100, 2))
+
+
+#gendervscountry$Country <- factor(gendervscountry$Country, levels=c("United States", "India", "Russia", "United Kingdom", "People's Republic of China", "Brazil", "Germany", "France", "Canada", "Australia" ))
+
+ggplot(gendervscountry, aes(x = GenderSelect, y = percent, fill=GenderSelect)) + 
+  geom_bar(stat = "identity") + 
+  facet_wrap(~Country) + 
+  labs(title = "Gender Gap in the top 10 Kaggle User Countries") + 
+  theme(plot.title=element_text(hjust=0.5)) +
+  geom_text(aes(label = percent), position=position_stack(vjust=0.85)) +
+  theme(legend.position="none")
+
+
+
+
+
+
+
+```
+
 ### Data Exploration
 ### Demographics - Age, Gender, Location, Age/gender, Location/gender, Education
 
